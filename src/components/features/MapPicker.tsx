@@ -66,8 +66,8 @@ export default function MapPicker({ onConfirm, onClose, initialLat, initialLng }
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
-  const [pickedLat, setPickedLat] = useState<number | null>(initialLat || null);
-  const [pickedLng, setPickedLng] = useState<number | null>(initialLng || null);
+  const [pickedLat, setPickedLat] = useState<number | null>(initialLat ?? null);
+  const [pickedLng, setPickedLng] = useState<number | null>(initialLng ?? null);
   const [address, setAddress] = useState<string>("");
   const [geocoding, setGeocoding] = useState(false);
   const [hint, setHint] = useState(true);
@@ -75,8 +75,8 @@ export default function MapPicker({ onConfirm, onClose, initialLat, initialLng }
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const initLat = initialLat || KATHMANDU_CENTER[1];
-    const initLng = initialLng || KATHMANDU_CENTER[0];
+    const initLat = initialLat ?? KATHMANDU_CENTER[1];
+    const initLng = initialLng ?? KATHMANDU_CENTER[0];
 
     // API-key-free OpenStreetMap basemap.
     const map = L.map(containerRef.current, {
@@ -93,25 +93,9 @@ export default function MapPicker({ onConfirm, onClose, initialLat, initialLng }
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    // If there's an initial position, place a marker
-    if (initialLat && initialLng) {
-      const marker = L.marker([initialLat, initialLng], { icon: createPickerPin(darkMode), draggable: true }).addTo(map);
-      markerRef.current = marker;
-      marker.on("dragend", () => {
-        const pos = marker.getLatLng();
-        setPickedLat(pos.lat);
-        setPickedLng(pos.lng);
-        reverseGeocode(pos.lat, pos.lng);
-      });
-    }
-
-    // Click on map to place pin
-    map.on("click", (e: L.LeafletMouseEvent) => {
-      setHint(false);
-      const { lat, lng } = e.latlng;
+    const placeMarker = (lat: number, lng: number) => {
       setPickedLat(lat);
       setPickedLng(lng);
-
       if (markerRef.current) {
         markerRef.current.setLatLng([lat, lng]);
       } else {
@@ -124,8 +108,34 @@ export default function MapPicker({ onConfirm, onClose, initialLat, initialLng }
           reverseGeocode(pos.lat, pos.lng);
         });
       }
-
       reverseGeocode(lat, lng);
+    };
+
+    // Start at the user's current location when available, otherwise fall back to the initial coords.
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          map.setView([latitude, longitude], 16);
+          placeMarker(latitude, longitude);
+          setHint(false);
+        },
+        () => {
+          if (initialLat && initialLng) {
+            placeMarker(initialLat, initialLng);
+          }
+        },
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else if (initialLat && initialLng) {
+      placeMarker(initialLat, initialLng);
+    }
+
+    // Click on map to place pin
+    map.on("click", (e: L.LeafletMouseEvent) => {
+      setHint(false);
+      const { lat, lng } = e.latlng;
+      placeMarker(lat, lng);
     });
 
     mapRef.current = map;
