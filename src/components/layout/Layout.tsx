@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, Outlet } from "react-router-dom";
+import { NavLink, useNavigate, Outlet } from "react-router-dom";
 import { Plus, User, LogIn, Menu, Sun, Moon, Search, Wifi } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useApp } from "@/context/AppContext";
@@ -22,10 +22,10 @@ export default function Layout() {
           {/* Hamburger — mobile: opens drawer; desktop: toggles sidebar expand */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-border bg-card/90 text-foreground shadow-sm hover:bg-card transition-colors flex-shrink-0"
             aria-label="Toggle navigation"
           >
-            <Menu size={20} />
+            <Menu size={20} strokeWidth={2.5} />
           </button>
 
           {/* Logo — mobile only */}

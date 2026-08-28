@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Wifi, Signal, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wifi, Signal } from "lucide-react";
 import MapView from "@/components/features/MapView";
 import MapFilters from "@/components/features/MapFilters";
 import NetworkCard from "@/components/features/NetworkCard";
@@ -17,8 +17,6 @@ export default function MapPage() {
 
   // Desktop side-panel
   const [listOpen, setListOpen] = useState(true);
-  // Mobile side-panel
-  const [mobileListOpen, setMobileListOpen] = useState(true);
 
   const filteredNetworks = useMemo(() => {
     return allNetworks.filter((n) => {
@@ -92,66 +90,7 @@ export default function MapPage() {
       {/* ── MAP (always full area on mobile, partial on desktop) ── */}
       <div className="flex-1 relative">
         <MapView networks={filteredNetworks} onMarkerClick={handleMarkerClick} />
-
-        <button
-          onClick={() => setMobileListOpen((prev) => !prev)}
-          className="lg:hidden absolute top-4 left-4 z-20 flex items-center gap-2 rounded-full border border-border bg-card/90 px-3 py-2 text-xs font-medium shadow-lg backdrop-blur-md"
-        >
-          {mobileListOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-          <span>Nearby WiFi</span>
-          <span className="rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-[10px] text-cyan-400">
-            {filteredNetworks.length}
-          </span>
-        </button>
       </div>
-
-      {/* ── MOBILE side panel ─────────────────────────── */}
-      <div
-        className={cn(
-          "lg:hidden fixed inset-y-0 left-0 z-[600] flex w-[82vw] max-w-[340px] flex-col border-r border-border bg-card/95 shadow-2xl backdrop-blur-md transition-transform duration-300",
-          mobileListOpen ? "translate-x-0" : "-translate-x-full"
-        )}
-      >
-        <div className="flex items-center justify-between border-b border-border px-3 py-3">
-          <div className="flex items-center gap-2">
-            <Wifi size={15} className="text-cyan-400" />
-            <div>
-              <div className="text-sm font-semibold">Nearby WiFi</div>
-              <div className="text-[10px] text-muted-foreground">{filteredNetworks.length} locations found</div>
-            </div>
-          </div>
-          <button
-            onClick={() => setMobileListOpen(false)}
-            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 text-muted-foreground"
-            aria-label="Close nearby WiFi"
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        <div className="border-b border-border px-3 py-3">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Networks</span>
-            <span className="flex items-center gap-1 text-green-400">
-              <Signal size={11} />
-              {filteredNetworks.filter((n) => n.status === "verified").length} verified
-            </span>
-          </div>
-          <div className="mt-2">
-            <MapFilters />
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-hidden">{NetworkList}</div>
-      </div>
-
-      {mobileListOpen && (
-        <button
-          aria-label="Close nearby wifi panel"
-          onClick={() => setMobileListOpen(false)}
-          className="lg:hidden fixed inset-0 z-[500] bg-black/30"
-        />
-      )}
     </div>
   );
 }
