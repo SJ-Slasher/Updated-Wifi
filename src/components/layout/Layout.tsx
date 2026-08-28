@@ -1,15 +1,9 @@
 import React from "react";
-import { NavLink, useNavigate, Outlet } from "react-router-dom";
-import { Map, Plus, Trophy, User, LogIn, Menu, Sun, Moon, Search, Wifi } from "lucide-react";
+import { useNavigate, Outlet } from "react-router-dom";
+import { Plus, User, LogIn, Menu, Sun, Moon, Search, Wifi } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { useApp } from "@/context/AppContext";
-import { cn } from "@/lib/utils";
 
-const mobileNavItems = [
-  { to: "/", icon: Map, label: "Map", end: true },
-  { to: "/add-wifi", icon: Plus, label: "Add WiFi", end: false },
-  { to: "/leaderboard", icon: Trophy, label: "Leaders", end: false },
-];
 
 export default function Layout() {
   const { user, isAuthenticated, sidebarOpen, setSidebarOpen, darkMode, toggleDarkMode, setMapFilters, mapFilters } = useApp();
@@ -89,72 +83,9 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto pb-16 lg:pb-0">
+        <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
-
-        {/* ── Mobile bottom tab bar ── */}
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[35] bg-card/95 backdrop-blur-md border-t border-border flex items-center safe-area-bottom">
-          {mobileNavItems.map(({ to, icon: Icon, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) => cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-cyan-400" : "text-muted-foreground"
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  <div className={cn(
-                    "w-9 h-9 flex items-center justify-center rounded-xl transition-all",
-                    isActive && "bg-cyan-500/15"
-                  )}>
-                    <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span>{label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
-          {/* Profile / Sign In at end of bottom bar */}
-          {isAuthenticated ? (
-            <NavLink
-              to="/profile"
-              className={({ isActive }) => cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-cyan-400" : "text-muted-foreground"
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  <div className={cn("w-9 h-9 flex items-center justify-center rounded-xl transition-all", isActive && "bg-cyan-500/15")}>
-                    <User size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span>Profile</span>
-                </>
-              )}
-            </NavLink>
-          ) : (
-            <NavLink
-              to="/login"
-              className={({ isActive }) => cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors",
-                isActive ? "text-cyan-400" : "text-muted-foreground"
-              )}
-            >
-              {({ isActive }) => (
-                <>
-                  <div className={cn("w-9 h-9 flex items-center justify-center rounded-xl transition-all", isActive && "bg-cyan-500/15")}>
-                    <LogIn size={20} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span>Sign In</span>
-                </>
-              )}
-            </NavLink>
-          )}
-        </nav>
       </div>
     </div>
   );

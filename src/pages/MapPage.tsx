@@ -1,6 +1,6 @@
-import React, { useState, useMemo, useCallback, useRef } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Wifi, Signal } from "lucide-react";
+import { ChevronLeft, ChevronRight, Wifi, Signal, X } from "lucide-react";
 import MapView from "@/components/features/MapView";
 import MapFilters from "@/components/features/MapFilters";
 import NetworkCard from "@/components/features/NetworkCard";
@@ -10,10 +10,6 @@ import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import type { WifiNetwork } from "@/types";
 
-// Bottom sheet heights (mobile)
-const PEEK_H = 72;   // collapsed: just the handle bar
-const HALF_H = 340;  // half-open: filters + a few cards
-
 export default function MapPage() {
   const { mapFilters } = useApp();
   const navigate = useNavigate();
@@ -21,9 +17,8 @@ export default function MapPage() {
 
   // Desktop side-panel
   const [listOpen, setListOpen] = useState(true);
-  // Mobile bottom-sheet: "peek" | "half" | "full"
-  const [sheetState, setSheetState] = useState<"peek" | "half" | "full">("peek");
-  const startY = useRef<number | null>(null);
+  // Mobile side-panel
+  const [mobileListOpen, setMobileListOpen] = useState(true);
 
   const filteredNetworks = useMemo(() => {
     return allNetworks.filter((n) => {
@@ -41,23 +36,6 @@ export default function MapPage() {
   const handleMarkerClick = useCallback((network: WifiNetwork) => {
     navigate(`/network/${network.id}`);
   }, [navigate]);
-
-  // Swipe-to-expand helpers
-  const handleTouchStart = (e: React.TouchEvent) => {
-    startY.current = e.touches[0].clientY;
-  };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (startY.current === null) return;
-    const dy = startY.current - e.changedTouches[0].clientY; // positive = swipe up
-    if (dy > 40) {
-      setSheetState((s) => s === "peek" ? "half" : "full");
-    } else if (dy < -40) {
-      setSheetState((s) => s === "full" ? "half" : "peek");
-    }
-    startY.current = null;
-  };
-
-  const sheetH = sheetState === "peek" ? PEEK_H : sheetState === "half" ? HALF_H : "85dvh";
 
   const NetworkList = (
     <div className="flex-1 overflow-y-auto scrollbar-thin p-3 space-y-2">
@@ -114,59 +92,66 @@ export default function MapPage() {
       {/* ── MAP (always full area on mobile, partial on desktop) ── */}
       <div className="flex-1 relative">
         <MapView networks={filteredNetworks} onMarkerClick={handleMarkerClick} />
+
+        <button
+          onClick={() => setMobileListOpen((prev) => !prev)}
+          className="lg:hidden absolute top-4 left-4 z-20 flex items-center gap-2 rounded-full border border-border bg-card/90 px-3 py-2 text-xs font-medium shadow-lg backdrop-blur-md"
+        >
+          {mobileListOpen ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          <span>Nearby WiFi</span>
+          <span className="rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-[10px] text-cyan-400">
+            {filteredNetworks.length}
+          </span>
+        </button>
       </div>
 
-      {/* ── MOBILE bottom sheet ─────────────────────────── */}
+      {/* ── MOBILE side panel ─────────────────────────── */}
       <div
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-[600] flex flex-col bg-card border-t border-border rounded-t-2xl shadow-2xl"
-        style={{
-          height: typeof sheetH === "number" ? `${sheetH}px` : sheetH,
-          transition: "height 0.32s cubic-bezier(0.32,0.72,0,1)",
-        }}
+        className={cn(
+          "lg:hidden fixed inset-y-0 left-0 z-[600] flex w-[82vw] max-w-[340px] flex-col border-r border-border bg-card/95 shadow-2xl backdrop-blur-md transition-transform duration-300",
+          mobileListOpen ? "translate-x-0" : "-translate-x-full"
+        )}
       >
-        {/* Drag handle + header */}
-        <div
-          className="flex-shrink-0 cursor-grab active:cursor-grabbing select-none"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onClick={() => setSheetState((s) => s === "peek" ? "half" : s === "half" ? "full" : "peek")}
-        >
-          {/* Pill */}
-          <div className="flex justify-center pt-2.5 pb-1">
-            <div className="w-9 h-1 bg-border rounded-full" />
+        <div className="flex items-center justify-between border-b border-border px-3 py-3">
+          <div className="flex items-center gap-2">
+            <Wifi size={15} className="text-cyan-400" />
+            <div>
+              <div className="text-sm font-semibold">Nearby WiFi</div>
+              <div className="text-[10px] text-muted-foreground">{filteredNetworks.length} locations found</div>
+            </div>
           </div>
+          <button
+            onClick={() => setMobileListOpen(false)}
+            className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 text-muted-foreground"
+            aria-label="Close nearby WiFi"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
-          {/* Summary row — always visible */}
-          <div className="flex items-center justify-between px-4 pb-3 pt-1">
-            <div className="flex items-center gap-2">
-              <Wifi size={15} className="text-cyan-400" />
-              <span className="font-semibold text-sm">Nearby WiFi</span>
-              <span className="text-xs text-muted-foreground bg-white/10 px-1.5 py-0.5 rounded-full">
-                {filteredNetworks.length}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-xs text-green-400">
-                <Signal size={11} />
-                <span>{filteredNetworks.filter(n => n.status === "verified").length} verified</span>
-              </div>
-              {sheetState === "peek"
-                ? <ChevronUp size={16} className="text-muted-foreground" />
-                : <ChevronDown size={16} className="text-muted-foreground" />}
-            </div>
+        <div className="border-b border-border px-3 py-3">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>Networks</span>
+            <span className="flex items-center gap-1 text-green-400">
+              <Signal size={11} />
+              {filteredNetworks.filter((n) => n.status === "verified").length} verified
+            </span>
+          </div>
+          <div className="mt-2">
+            <MapFilters />
           </div>
         </div>
 
-        {/* Filters + list — only when not peeking */}
-        {sheetState !== "peek" && (
-          <div className="flex flex-col flex-1 overflow-hidden animate-fade-in">
-            <div className="px-3 pb-2 border-b border-border">
-              <MapFilters />
-            </div>
-            {NetworkList}
-          </div>
-        )}
+        <div className="flex-1 overflow-hidden">{NetworkList}</div>
       </div>
+
+      {mobileListOpen && (
+        <button
+          aria-label="Close nearby wifi panel"
+          onClick={() => setMobileListOpen(false)}
+          className="lg:hidden fixed inset-0 z-[500] bg-black/30"
+        />
+      )}
     </div>
   );
 }
