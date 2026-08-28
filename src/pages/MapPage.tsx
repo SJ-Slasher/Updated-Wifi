@@ -17,6 +17,7 @@ export default function MapPage() {
 
   // Desktop side-panel
   const [listOpen, setListOpen] = useState(true);
+  const [mobileListOpen, setMobileListOpen] = useState(false);
 
   const filteredNetworks = useMemo(() => {
     return allNetworks.filter((n) => {
@@ -90,6 +91,61 @@ export default function MapPage() {
       {/* ── MAP (always full area on mobile, partial on desktop) ── */}
       <div className="flex-1 relative">
         <MapView networks={filteredNetworks} onMarkerClick={handleMarkerClick} />
+
+        <button
+          onClick={() => setMobileListOpen((prev) => !prev)}
+          className="lg:hidden absolute left-4 top-3 z-[1000] flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-slate-950/95 px-3.5 py-2.5 text-sm font-bold text-white shadow-xl shadow-cyan-500/20 backdrop-blur-md"
+        >
+          <Wifi size={15} className="text-cyan-400" />
+          <span>Nearby WiFi</span>
+          <span className="rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-[10px] text-cyan-300">
+            {filteredNetworks.length}
+          </span>
+        </button>
+
+        {mobileListOpen && (
+          <div className="lg:hidden fixed inset-y-0 left-0 z-[500] w-[82vw] max-w-[330px] bg-card/95 border-r border-border shadow-2xl backdrop-blur-md transition-transform duration-300">
+            <div className="flex items-center justify-between border-b border-border px-3 py-3">
+              <div className="flex items-center gap-2">
+                <Wifi size={15} className="text-cyan-400" />
+                <div>
+                  <div className="text-sm font-semibold">Nearby WiFi</div>
+                  <div className="text-[10px] text-muted-foreground">{filteredNetworks.length} locations found</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setMobileListOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/10 text-muted-foreground"
+                aria-label="Close nearby WiFi"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="border-b border-border px-3 py-3">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Networks</span>
+                <span className="flex items-center gap-1 text-green-400">
+                  <Signal size={11} />
+                  {filteredNetworks.filter((n) => n.status === "verified").length} verified
+                </span>
+              </div>
+              <div className="mt-2">
+                <MapFilters />
+              </div>
+            </div>
+
+            <div className="h-[calc(100%-120px)] overflow-hidden">{NetworkList}</div>
+          </div>
+        )}
+
+        {mobileListOpen && (
+          <button
+            aria-label="Close nearby wifi list"
+            onClick={() => setMobileListOpen(false)}
+            className="lg:hidden fixed inset-0 z-[450] bg-black/30"
+          />
+        )}
       </div>
     </div>
   );

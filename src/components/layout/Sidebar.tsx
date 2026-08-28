@@ -38,129 +38,18 @@ export default function Sidebar() {
         />
       )}
 
-      {/* ── Desktop sidebar: always-visible icon rail, expands to full on toggle ── */}
+      {/* ── Slide-in navigation drawer (hidden by default, opens on menu click) ── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 z-[39]"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       <aside className={cn(
-        "hidden lg:flex flex-col h-full border-r border-border bg-card transition-all duration-300 overflow-hidden flex-shrink-0",
-        sidebarOpen ? "w-56" : "w-[60px]"
-      )}>
-        {/* Logo */}
-        <div className={cn(
-          "flex items-center border-b border-border h-14 flex-shrink-0 px-3",
-          sidebarOpen ? "gap-3 justify-between" : "justify-center"
-        )}>
-          <div className="flex items-center gap-3 overflow-hidden">
-            <div className="flex-shrink-0 w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
-              <Wifi size={15} className="text-navy-900" />
-            </div>
-            {sidebarOpen && (
-              <div className="animate-fade-in min-w-0">
-                <div className="font-bold text-sm gradient-text">WiFiHub</div>
-                <div className="text-[10px] text-muted-foreground leading-none">Nepal</div>
-              </div>
-            )}
-          </div>
-          {sidebarOpen && (
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors flex-shrink-0"
-            >
-              <ChevronRight size={12} />
-            </button>
-          )}
-        </div>
-
-        {/* Nav items */}
-        <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-y-auto scrollbar-thin">
-          {allNavItems.map(({ to, icon: Icon, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              title={!sidebarOpen ? label : undefined}
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium transition-all relative group",
-                "text-muted-foreground hover:text-foreground hover:bg-white/10",
-                isActive && "bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/20",
-                !sidebarOpen && "justify-center px-0"
-              )}
-            >
-              <Icon size={18} className="flex-shrink-0" />
-              {sidebarOpen && <span className="truncate animate-fade-in">{label}</span>}
-              {/* Tooltip when collapsed */}
-              {!sidebarOpen && (
-                <span className="absolute left-full ml-2 px-2 py-1 bg-popover border border-border rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-lg">
-                  {label}
-                </span>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* User section */}
-        <div className="border-t border-border px-2 py-3 space-y-1">
-          {isAuthenticated && user ? (
-            <>
-              {sidebarOpen && (
-                <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg animate-fade-in">
-                  <div className="w-7 h-7 flex-shrink-0 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-semibold text-white">
-                    {user.full_name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-xs font-medium truncate">{user.full_name}</div>
-                    <div className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <span>{getBadgeForPoints(user.reputation_points).icon}</span>
-                      <span>{user.reputation_points} pts</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <button
-                onClick={handleLogout}
-                title={!sidebarOpen ? "Log Out" : undefined}
-                className={cn(
-                  "flex items-center gap-3 w-full rounded-lg px-2 py-2.5 text-sm font-medium transition-all group relative",
-                  "text-muted-foreground hover:text-red-400 hover:bg-red-500/10",
-                  !sidebarOpen && "justify-center px-0"
-                )}
-              >
-                <LogOut size={16} className="flex-shrink-0" />
-                {sidebarOpen && <span className="animate-fade-in">Log Out</span>}
-                {!sidebarOpen && (
-                  <span className="absolute left-full ml-2 px-2 py-1 bg-popover border border-border rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-lg">
-                    Log Out
-                  </span>
-                )}
-              </button>
-            </>
-          ) : (
-            <NavLink
-              to="/login"
-              title={!sidebarOpen ? "Sign In" : undefined}
-              className={({ isActive }) => cn(
-                "flex items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium transition-all relative group",
-                "text-muted-foreground hover:text-foreground hover:bg-white/10",
-                isActive && "text-cyan-400",
-                !sidebarOpen && "justify-center px-0"
-              )}
-            >
-              <LogIn size={18} className="flex-shrink-0" />
-              {sidebarOpen && <span className="animate-fade-in">Sign In</span>}
-              {!sidebarOpen && (
-                <span className="absolute left-full ml-2 px-2 py-1 bg-popover border border-border rounded-md text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-lg">
-                  Sign In
-                </span>
-              )}
-            </NavLink>
-          )}
-        </div>
-      </aside>
-
-      {/* ── Mobile slide-in drawer (only when open) ── */}
-      <aside className={cn(
-        "lg:hidden fixed top-0 left-0 h-full w-64 z-[40] flex flex-col bg-card border-r border-border transition-transform duration-300 shadow-2xl",
+        "fixed inset-y-0 left-0 z-[40] flex w-[82vw] max-w-[320px] flex-col bg-card border-r border-border transition-transform duration-300 shadow-2xl",
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        {/* Mobile drawer header */}
         <div className="flex items-center gap-3 px-4 h-14 border-b border-border flex-shrink-0">
           <div className="w-8 h-8 bg-cyan-500 rounded-lg flex items-center justify-center">
             <Wifi size={15} className="text-navy-900" />
@@ -172,6 +61,7 @@ export default function Sidebar() {
           <button
             onClick={() => setSidebarOpen(false)}
             className="w-7 h-7 flex items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-white/10"
+            aria-label="Close navigation"
           >
             ✕
           </button>
