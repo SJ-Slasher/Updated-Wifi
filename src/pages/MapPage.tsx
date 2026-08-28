@@ -92,16 +92,18 @@ export default function MapPage() {
       <div className="flex-1 relative">
         <MapView networks={filteredNetworks} onMarkerClick={handleMarkerClick} />
 
-        <button
-          onClick={() => setMobileListOpen((prev) => !prev)}
-          className="lg:hidden absolute left-4 top-3 z-[1000] flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-slate-950/95 px-3.5 py-2.5 text-sm font-bold text-white shadow-xl shadow-cyan-500/20 backdrop-blur-md"
-        >
-          <Wifi size={15} className="text-cyan-400" />
-          <span>Nearby WiFi</span>
-          <span className="rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-[10px] text-cyan-300">
-            {filteredNetworks.length}
-          </span>
-        </button>
+        {!mobileListOpen && (
+          <button
+            onClick={() => setMobileListOpen((prev) => !prev)}
+            className="lg:hidden absolute left-4 top-3 z-[1000] flex items-center gap-2 rounded-xl border border-cyan-400/60 bg-slate-950/95 px-3.5 py-2.5 text-sm font-bold text-white shadow-xl shadow-cyan-500/20 backdrop-blur-md"
+          >
+            <Wifi size={15} className="text-cyan-400" />
+            <span>Nearby WiFi</span>
+            <span className="rounded-full bg-cyan-500/15 px-1.5 py-0.5 text-[10px] text-cyan-300">
+              {filteredNetworks.length}
+            </span>
+          </button>
+        )}
 
         {mobileListOpen && (
           <div className="lg:hidden fixed inset-y-0 left-0 z-[500] w-[82vw] max-w-[330px] bg-card/95 border-r border-border shadow-2xl backdrop-blur-md transition-transform duration-300">

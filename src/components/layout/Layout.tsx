@@ -50,13 +50,22 @@ export default function Layout() {
 
           <div className="flex items-center gap-1.5 ml-auto">
             {isAuthenticated && (
-              <button
-                onClick={() => navigate("/add-wifi")}
-                className="hidden sm:flex items-center gap-1.5 btn-primary text-xs py-1.5 px-3"
-              >
-                <Plus size={13} />
-                Add WiFi
-              </button>
+              <>
+                <button
+                  onClick={() => navigate("/add-wifi")}
+                  className="flex sm:hidden items-center gap-1.5 btn-primary text-[11px] py-2 px-2.5"
+                >
+                  <Plus size={12} />
+                  Add WiFi
+                </button>
+                <button
+                  onClick={() => navigate("/add-wifi")}
+                  className="hidden sm:flex items-center gap-1.5 btn-primary text-xs py-1.5 px-3"
+                >
+                  <Plus size={13} />
+                  Add WiFi
+                </button>
+              </>
             )}
             <button
               onClick={toggleDarkMode}
